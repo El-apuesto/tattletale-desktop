@@ -2,7 +2,7 @@
   "name": "tattletale",
   "version": "1.0.0",
   "description": "Privacy-first desktop transcription app using Whisper AI",
-  "main": "dist/main.js",
+  "main": ".webpack/main",
   "homepage": ".",
   "author": "Tattletale",
   "license": "MIT",
@@ -10,10 +10,8 @@
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "build": "webpack --mode production",
-    "dev": "webpack --mode development && electron-forge start",
-    "webpack": "webpack",
-    "electron": "electron ."
+    "build": "electron-forge make",
+    "dev": "electron-forge start"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.5.0",
