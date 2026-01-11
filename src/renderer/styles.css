@@ -6,14 +6,11 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  /* Uncomment when you add tattletale-logo.png to assets folder:
   background-image: url('../assets/tattletale-logo.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  */
-  background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
   color: #ffffff;
   padding: 0;
   margin: 0;
@@ -22,8 +19,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Dark overlay - enable when background image is added */
-/*
+/* Dark overlay to make text readable over the background */
 body::before {
   content: '';
   position: fixed;
@@ -36,7 +32,6 @@ body::before {
   pointer-events: none;
   z-index: 0;
 }
-*/
 
 .app {
   max-width: 1000px;
