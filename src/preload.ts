@@ -1,8 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
-// Expose protected methods that allow the renderer process to use
-// the ipcRenderer without exposing the entire object
-contextBridge.exposeInMainWorld('electronAPI', {
+// Expose as 'electron' (not electronAPI) to match App.tsx
+contextBridge.exposeInMainWorld('electron', {
   // App state
   getAppState: () => ipcRenderer.invoke('get-app-state'),
   
@@ -17,6 +16,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // File operations
   selectFile: () => ipcRenderer.invoke('select-file'),
+  saveDroppedFile: (fileName: string, buffer: ArrayBuffer) => 
+    ipcRenderer.invoke('save-dropped-file', { fileName, buffer }),
   
   // Transcription
   startTranscription: (filePath: string) => ipcRenderer.invoke('start-transcription', filePath),
