@@ -19,7 +19,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Dark overlay to make text readable over the background */
+/* Dark overlay only - no blur */
 body::before {
   content: '';
   position: fixed;
@@ -27,8 +27,7 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(3px);
+  background: rgba(0, 0, 0, 0.4);
   pointer-events: none;
   z-index: 0;
 }
