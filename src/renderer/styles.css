@@ -16,7 +16,8 @@ body {
   overflow-x: hidden;
 }
 
-/* Tattletale logo background watermark */
+/* Tattletale logo background watermark - UNCOMMENT WHEN YOU ADD THE IMAGE */
+/*
 body::before {
   content: '';
   position: fixed;
@@ -33,6 +34,7 @@ body::before {
   pointer-events: none;
   z-index: 0;
 }
+*/
 
 .app {
   max-width: 1000px;
