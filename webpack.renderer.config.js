@@ -14,6 +14,10 @@ module.exports = {
       "crypto": false,
     }
   },
-  target: 'electron-renderer',
+  output: {
+    libraryTarget: 'umd',
+    globalObject: 'self'
+  },
+  target: 'web',
   mode: 'development',
 };
