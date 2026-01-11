@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, dialog, shell, Menu } from 'electron';
 import path from 'path';
 import { spawn } from 'child_process';
 import Store from 'electron-store';
-import { AppState, UsageStats, License, TranscriptionResult } from './types/index.js';
+import { AppState, UsageStats, License, TranscriptionResult } from './types';
 
 // Handle Squirrel.Windows installer events
 if (process.platform === 'win32') {
@@ -53,7 +53,6 @@ class TattletaleApp {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        enableRemoteModule: false,
         preload: path.join(__dirname, 'preload.js'),
       },
       icon: path.join(__dirname, '../assets/icon.png'),
