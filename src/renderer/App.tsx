@@ -15,6 +15,9 @@ const App: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [transcriptionProgress, setTranscriptionProgress] = useState(0);
+  const [transcriptResult, setTranscriptResult] = useState<any>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -23,6 +26,18 @@ const App: React.FC = () => {
     // Load app state
     if (window.electron) {
       window.electron.getAppState().then(setAppState);
+      
+      // Listen for transcription progress
+      window.electron.onTranscriptionProgress((progress: number) => {
+        setTranscriptionProgress(progress);
+      });
+      
+      // Listen for transcription complete
+      window.electron.onTranscriptionComplete((result: any) => {
+        setTranscriptResult(result);
+        setIsTranscribing(false);
+        setTranscriptionProgress(0);
+      });
     }
   }, []);
 
@@ -30,6 +45,7 @@ const App: React.FC = () => {
     e.preventDefault();
     const droppedFiles = Array.from(e.dataTransfer.files);
     setFiles(droppedFiles);
+    startTranscription(droppedFiles[0]);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -40,9 +56,24 @@ const App: React.FC = () => {
     if (window.electron) {
       const filePath = await window.electron.selectFile();
       if (filePath) {
-        // Add selected file to list
         console.log('Selected file:', filePath);
+        startTranscription(filePath);
       }
+    }
+  };
+
+  const startTranscription = async (file: any) => {
+    setIsTranscribing(true);
+    setTranscriptionProgress(0);
+    
+    try {
+      if (window.electron) {
+        const filePath = typeof file === 'string' ? file : file.path;
+        await window.electron.startTranscription(filePath);
+      }
+    } catch (error) {
+      console.error('Transcription failed:', error);
+      setIsTranscribing(false);
     }
   };
 
@@ -70,6 +101,7 @@ const App: React.FC = () => {
         const file = new File([blob], `recording-${Date.now()}.webm`, { type: 'audio/webm' });
         setFiles([file]);
         stream.getTracks().forEach(track => track.stop());
+        startTranscription(file);
       };
 
       mediaRecorder.start();
@@ -143,7 +175,7 @@ const App: React.FC = () => {
         onClick={handleFileSelect}
       >
         <p>Drop audio files here or click to browse</p>
-        {files.length > 0 && (
+        {files.length > 0 && !isTranscribing && (
           <div>
             <h3>Files:</h3>
             <ul>
@@ -154,6 +186,34 @@ const App: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Transcription Progress */}
+      {isTranscribing && (
+        <div className="transcription-progress">
+          <h3>Transcribing...</h3>
+          <div className="progress-bar-container">
+            <div className="progress-bar" style={{ width: `${transcriptionProgress}%` }}></div>
+          </div>
+          <p className="progress-text">{transcriptionProgress}% Complete</p>
+        </div>
+      )}
+
+      {/* Transcript Result */}
+      {transcriptResult && !isTranscribing && (
+        <div className="transcript-result">
+          <h3>Transcript</h3>
+          <div className="transcript-content">
+            {transcriptResult.segments && transcriptResult.segments.map((segment: any, idx: number) => (
+              <div key={idx} className="transcript-segment">
+                <span className="timestamp">{segment.timestamp}</span>
+                <span className="speaker">{segment.speaker}</span>
+                <p>{segment.text}</p>
+              </div>
+            ))}
+          </div>
+          <button className="export-btn" onClick={() => console.log('Export functionality coming soon')}>📥 Export Transcript</button>
+        </div>
+      )}
 
       {/* Upgrade Modal */}
       {showUpgradeModal && (
