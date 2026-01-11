@@ -3,6 +3,8 @@ import path from 'path';
 import { spawn } from 'child_process';
 import Store from 'electron-store';
 import { AppState, UsageStats, License, TranscriptionResult } from './types';
+import os from 'os';
+import { promises as fs } from 'fs';
 
 // Electron Forge webpack entry point
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
@@ -12,10 +14,8 @@ declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 if (process.platform === 'win32') {
   const squirrelCommand = process.argv[1];
   if (squirrelCommand === '--squirrel-install' || squirrelCommand === '--squirrel-updated') {
-    // Install desktop and start menu shortcuts
     app.quit();
   } else if (squirrelCommand === '--squirrel-uninstall') {
-    // Remove shortcuts
     app.quit();
   } else if (squirrelCommand === '--squirrel-obsolete') {
     app.quit();
@@ -35,16 +35,9 @@ class TattletaleApp {
   private async initializeApp() {
     await app.whenReady();
     
-    // Set up menu
     this.createMenu();
-    
-    // Create main window
     await this.createMainWindow();
-    
-    // Set up IPC handlers
     this.setupIpcHandlers();
-    
-    // Handle app events
     this.setupAppEvents();
   }
 
@@ -64,10 +57,8 @@ class TattletaleApp {
       titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     });
 
-    // Load the app using Electron Forge webpack entry
     this.mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
     
-    // Open DevTools in development
     if (process.env.NODE_ENV === 'development') {
       this.mainWindow.webContents.openDevTools();
     }
@@ -153,70 +144,34 @@ class TattletaleApp {
       {
         label: 'Edit',
         submenu: [
-          {
-            role: 'undo'
-          },
-          {
-            role: 'redo'
-          },
-          {
-            type: 'separator'
-          },
-          {
-            role: 'cut'
-          },
-          {
-            role: 'copy'
-          },
-          {
-            role: 'paste'
-          },
-          {
-            role: 'selectall'
-          }
+          { role: 'undo' },
+          { role: 'redo' },
+          { type: 'separator' },
+          { role: 'cut' },
+          { role: 'copy' },
+          { role: 'paste' },
+          { role: 'selectall' }
         ]
       },
       {
         label: 'View',
         submenu: [
-          {
-            role: 'reload'
-          },
-          {
-            role: 'forceReload'
-          },
-          {
-            role: 'toggleDevTools'
-          },
-          {
-            type: 'separator'
-          },
-          {
-            role: 'resetZoom'
-          },
-          {
-            role: 'zoomIn'
-          },
-          {
-            role: 'zoomOut'
-          },
-          {
-            type: 'separator'
-          },
-          {
-            role: 'togglefullscreen'
-          }
+          { role: 'reload' },
+          { role: 'forceReload' },
+          { role: 'toggleDevTools' },
+          { type: 'separator' },
+          { role: 'resetZoom' },
+          { role: 'zoomIn' },
+          { role: 'zoomOut' },
+          { type: 'separator' },
+          { role: 'togglefullscreen' }
         ]
       },
       {
         label: 'Window',
         submenu: [
-          {
-            role: 'minimize'
-          },
-          {
-            role: 'close'
-          }
+          { role: 'minimize' },
+          { role: 'close' }
         ]
       },
       {
@@ -247,39 +202,32 @@ class TattletaleApp {
   }
 
   private setupIpcHandlers() {
-    // Get app state
     ipcMain.handle('get-app-state', () => {
       return this.getAppState();
     });
 
-    // Update usage
     ipcMain.handle('update-usage', (event, minutes: number) => {
       return this.updateUsage(minutes);
     });
 
-    // Validate license
     ipcMain.handle('validate-license', async (event, licenseKey: string) => {
       return this.validateLicense(licenseKey);
     });
 
-    // Get stored license
     ipcMain.handle('get-license', () => {
       return this.store.get('license') as License | null;
     });
 
-    // Store license
     ipcMain.handle('store-license', (event, license: License) => {
       this.store.set('license', license);
       return true;
     });
 
-    // Clear license
     ipcMain.handle('clear-license', () => {
       this.store.delete('license');
       return true;
     });
 
-    // Select file
     ipcMain.handle('select-file', async () => {
       const result = await dialog.showOpenDialog(this.mainWindow!, {
         properties: ['openFile'],
@@ -297,12 +245,27 @@ class TattletaleApp {
       return null;
     });
 
-    // Start transcription
+    ipcMain.handle('save-dropped-file', async (event, data: { fileName: string; buffer: ArrayBuffer }) => {
+      try {
+        const tempDir = path.join(os.tmpdir(), 'tattletale-temp');
+        await fs.mkdir(tempDir, { recursive: true });
+        
+        const filePath = path.join(tempDir, data.fileName);
+        const buffer = Buffer.from(data.buffer);
+        await fs.writeFile(filePath, buffer);
+        
+        console.log('Saved dropped file to:', filePath);
+        return filePath;
+      } catch (error) {
+        console.error('Failed to save dropped file:', error);
+        throw error;
+      }
+    });
+
     ipcMain.handle('start-transcription', async (event, filePath: string) => {
       return this.startTranscription(filePath);
     });
 
-    // Cancel transcription
     ipcMain.handle('cancel-transcription', () => {
       if (this.transcriptionProcess) {
         this.transcriptionProcess.kill();
@@ -311,18 +274,15 @@ class TattletaleApp {
       return true;
     });
 
-    // Export transcript
     ipcMain.handle('export-transcript', async (event, data: { format: string; content: string; filename: string }) => {
       return this.exportTranscript(data.format, data.content, data.filename);
     });
 
-    // Open external link
     ipcMain.handle('open-external', async (event, url: string) => {
       await shell.openExternal(url);
       return true;
     });
 
-    // Show message box
     ipcMain.handle('show-message', async (event, options: any) => {
       const result = await dialog.showMessageBox(this.mainWindow!, options);
       return result;
@@ -358,7 +318,6 @@ class TattletaleApp {
 
     const license = this.store.get('license') as License | null;
     
-    // Check if usage should be reset
     const now = new Date();
     const nextReset = new Date(usage.nextResetDate);
     if (now >= nextReset) {
@@ -387,12 +346,10 @@ class TattletaleApp {
 
     const license = this.store.get('license') as License | null;
     
-    // Unlimited tiers don't have usage limits
     if (license?.tier === 'unlimited' || license?.tier === 'student') {
       return true;
     }
 
-    // Check if usage should be reset
     const now = new Date();
     const nextReset = new Date(usage.nextResetDate);
     if (now >= nextReset) {
@@ -401,7 +358,6 @@ class TattletaleApp {
       usage.nextResetDate = this.getNextMonthDate().toISOString();
     }
 
-    // Check if user has enough minutes
     if (usage.minutesUsed + minutes > 60) {
       return false;
     }
@@ -412,10 +368,6 @@ class TattletaleApp {
   }
 
   private async validateLicense(licenseKey: string): Promise<License | null> {
-    // In a real app, this would call your backend API
-    // For demo purposes, we'll simulate validation
-    
-    // Mock validation logic
     if (licenseKey.startsWith('UNLIMITED-')) {
       return {
         key: licenseKey,
@@ -437,24 +389,14 @@ class TattletaleApp {
 
   private async startTranscription(filePath: string): Promise<boolean> {
     try {
-      // Read the audio file
-      const fs = await import('fs/promises');
       const audioBuffer = await fs.readFile(filePath);
-      
-      // Get file info
       const stats = await fs.stat(filePath);
       const fileSizeInMB = stats.size / (1024 * 1024);
-      
-      // Simulate transcription with progress updates
-      // In a real implementation, you would:
-      // 1. Decode the audio file to raw samples
-      // 2. Pass it to the Whisper service
-      // 3. Process the results
       
       return new Promise((resolve) => {
         let progress = 0;
         const interval = setInterval(() => {
-          progress += Math.random() * 8 + 2; // Random progress between 2-10%
+          progress += Math.random() * 8 + 2;
           progress = Math.min(progress, 100);
           
           this.mainWindow?.webContents.send('transcription-progress', Math.round(progress));
@@ -462,13 +404,11 @@ class TattletaleApp {
           if (progress >= 100) {
             clearInterval(interval);
             
-            // Simulate transcription result based on file size
             const segmentCount = Math.max(2, Math.min(8, Math.floor(fileSizeInMB / 5)));
             const segments: any[] = [];
             
             for (let i = 0; i < segmentCount; i++) {
               const startTime = i * 8;
-              const duration = 3 + Math.random() * 4;
               
               const sampleTexts = [
                 'Welcome to this transcription example. This demonstrates how Tattletale processes audio files.',
@@ -486,7 +426,7 @@ class TattletaleApp {
                 speaker: `Speaker ${(i % 3) + 1}`,
                 text: sampleTexts[i % sampleTexts.length],
                 startTime: startTime,
-                endTime: startTime + duration
+                endTime: startTime + 3 + Math.random() * 4
               });
             }
             
@@ -527,7 +467,6 @@ class TattletaleApp {
       });
       
       if (!result.canceled && result.filePath) {
-        const fs = await import('fs/promises');
         await fs.writeFile(result.filePath, content, 'utf8');
         return true;
       }
@@ -567,5 +506,4 @@ class TattletaleApp {
   }
 }
 
-// Initialize the app
 new TattletaleApp();
