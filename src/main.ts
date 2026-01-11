@@ -4,6 +4,10 @@ import { spawn } from 'child_process';
 import Store from 'electron-store';
 import { AppState, UsageStats, License, TranscriptionResult } from './types';
 
+// Electron Forge webpack entry point
+declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
+declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+
 // Handle Squirrel.Windows installer events
 if (process.platform === 'win32') {
   const squirrelCommand = process.argv[1];
@@ -53,20 +57,19 @@ class TattletaleApp {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        preload: path.join(__dirname, 'preload.js'),
+        preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       },
       icon: path.join(__dirname, '../assets/icon.png'),
       show: false,
       titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     });
 
-    // Load the app
-    const isDev = process.env.NODE_ENV === 'development';
-    if (isDev) {
-      this.mainWindow.loadURL('http://localhost:3000');
+    // Load the app using Electron Forge webpack entry
+    this.mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+    
+    // Open DevTools in development
+    if (process.env.NODE_ENV === 'development') {
       this.mainWindow.webContents.openDevTools();
-    } else {
-      this.mainWindow.loadFile(path.join(__dirname, '../dist/renderer/index.html'));
     }
 
     this.mainWindow.once('ready-to-show', () => {
