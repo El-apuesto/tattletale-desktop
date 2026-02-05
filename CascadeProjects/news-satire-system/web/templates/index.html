@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}The Satire Chronicle - Deadpan News Satire{% endblock %}
+{% block description %}The Satire Chronicle delivers deadpan satire that reveals uncomfortable truths about power, hypocrisy, and systemic dysfunction.{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-container">
+        <div class="hero-content">
+            <h1 class="hero-title">The Satire Chronicle</h1>
+            <p class="hero-subtitle">Deadpan satire that reveals uncomfortable truths about power, hypocrisy, and systemic dysfunction</p>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Article -->
+{% if featured_article %}
+<section class="featured-article">
+    <div class="container">
+        <article class="featured-card">
+            <div class="featured-image">
+                {% if featured_article.get('xkcd_comic') %}
+                    <img src="{{ featured_article.xkcd_comic.img }}" alt="{{ featured_article.xkcd_comic.alt }}" class="featured-img">
+                {% elif featured_article.get('custom_comic') %}
+                    <img src="{{ featured_article.custom_comic.url }}" alt="{{ featured_article.custom_comic.alt_text }}" class="featured-img">
+                {% else %}
+                    <div class="featured-placeholder">
+                        <span class="placeholder-text">SC</span>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="featured-content">
+                <div class="article-meta">
+                    <span class="category-tag">{{ featured_article.category|title }}</span>
+                    <span class="article-date">{{ featured_article.timestamp[:10] }}</span>
+                </div>
+                
+                <h2 class="featured-title">
+                    <a href="{{ url_for('article', article_id=featured_article.id) }}">
+                        {{ featured_article.headline }}
+                    </a>
+                </h2>
+                
+                <p class="featured-excerpt">{{ featured_article.opening_paragraph }}</p>
+                
+                <div class="featured-author">
+                    <span class="author-name">By {{ featured_article.byline }}</span>
+                </div>
+            </div>
+        </article>
+    </div>
+</section>
+{% endif %}
+
+<!-- Latest Articles -->
+<section class="latest-articles">
+    <div class="container">
+        <header class="section-header">
+            <h2 class="section-title">Latest Articles</h2>
+            <div class="section-divider"></div>
+        </header>
+        
+        <div class="articles-grid">
+            {% for article in other_articles %}
+            <article class="article-card">
+                <div class="article-image">
+                    {% if article.get('xkcd_comic') %}
+                        <img src="{{ article.xkcd_comic.img }}" alt="{{ article.xkcd_comic.alt }}" class="article-img">
+                    {% elif article.get('custom_comic') %}
+                        <img src="{{ article.custom_comic.url }}" alt="{{ article.custom_comic.alt_text }}" class="article-img">
+                    {% else %}
+                        <div class="article-placeholder">
+                            <span class="placeholder-text">SC</span>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="article-content">
+                    <div class="article-meta">
+                        <span class="category-tag">{{ article.category|title }}</span>
+                        <span class="article-date">{{ article.timestamp[:10] }}</span>
+                    </div>
+                    
+                    <h3 class="article-title">
+                        <a href="{{ url_for('article', article_id=article.id) }}">
+                            {{ article.headline }}
+                        </a>
+                    </h3>
+                    
+                    <p class="article-excerpt">{{ article.opening_paragraph[:100] }}...</p>
+                    
+                    <div class="article-author">
+                        <span class="author-name">{{ article.byline }}</span>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        
+        {% if not other_articles %}
+        <div class="no-articles">
+            <p>No articles available yet. Check back soon!</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="newsletter">
+    <div class="container">
+        <div class="newsletter-content">
+            <h2 class="newsletter-title">Stay Informed</h2>
+            <p class="newsletter-subtitle">Get the latest deadpan satire delivered to your inbox</p>
+            
+            <form class="newsletter-form">
+                <input type="email" placeholder="Enter your email" class="newsletter-input" required>
+                <button type="submit" class="newsletter-button">Subscribe</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

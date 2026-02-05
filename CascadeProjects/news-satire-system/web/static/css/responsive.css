@@ -1,0 +1,300 @@
+/* Responsive Design for The Satire Chronicle */
+
+/* Large Tablets */
+@media (max-width: 1024px) {
+    .hero-title {
+        font-size: 3rem;
+    }
+    
+    .featured-card {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    .featured-image {
+        height: 300px;
+    }
+    
+    .articles-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    
+    .footer-links {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .nav-menu {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--spacing-md);
+    }
+    
+    .hero {
+        padding: calc(100px + var(--spacing-lg)) 0 var(--spacing-lg);
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.125rem;
+    }
+    
+    .featured-title {
+        font-size: 2rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .newsletter-title {
+        font-size: 2rem;
+    }
+    
+    .newsletter-form {
+        flex-direction: column;
+        max-width: 300px;
+    }
+    
+    .articles-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .footer-links {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .social-links {
+        justify-content: center;
+    }
+}
+
+/* Mobile Phones */
+@media (max-width: 480px) {
+    :root {
+        --spacing-xs: 0.5rem;
+        --spacing-sm: 0.75rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
+    }
+    
+    .nav-container {
+        padding: 0 var(--spacing-sm);
+    }
+    
+    .container {
+        padding: 0 var(--spacing-sm);
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+        line-height: 1.1;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .featured-content {
+        padding: var(--spacing-md);
+    }
+    
+    .featured-title {
+        font-size: 1.5rem;
+    }
+    
+    .featured-excerpt {
+        font-size: 1rem;
+    }
+    
+    .section-title {
+        font-size: 1.75rem;
+    }
+    
+    .article-title {
+        font-size: 1.25rem;
+    }
+    
+    .newsletter-title {
+        font-size: 1.75rem;
+    }
+    
+    .newsletter-subtitle {
+        font-size: 1rem;
+    }
+    
+    .modal-content {
+        margin: 20% auto;
+        padding: var(--spacing-md);
+        width: 95%;
+    }
+    
+    .brand-initial {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
+    .nav-brand .brand-link {
+        font-size: 1.25rem;
+    }
+    
+    .nav-menu {
+        gap: var(--spacing-sm);
+    }
+    
+    .nav-link {
+        font-size: 0.75rem;
+    }
+    
+    .subscribe-btn {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+}
+
+/* Small Mobile Phones */
+@media (max-width: 320px) {
+    .hero-title {
+        font-size: 1.75rem;
+    }
+    
+    .featured-title {
+        font-size: 1.375rem;
+    }
+    
+    .article-title {
+        font-size: 1.125rem;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+    }
+}
+
+/* Landscape Orientation */
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero {
+        padding: calc(80px + var(--spacing-md)) 0 var(--spacing-md);
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .modal-content {
+        margin: 5% auto;
+    }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .brand-initial {
+        border: 0.5px solid var(--pure-white);
+    }
+    
+    .featured-img,
+    .article-img {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary-black: #f8f8f8;
+        --soft-black: #e5e5e5;
+        --medium-gray: #999999;
+        --light-gray: #333333;
+        --off-white: #1a1a1a;
+        --pure-white: #0a0a0a;
+    }
+    
+    .header {
+        background: rgba(10, 10, 10, 0.95);
+        border-bottom-color: var(--light-gray);
+    }
+    
+    .hero {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--soft-black) 100%);
+    }
+    
+    .newsletter {
+        background: var(--pure-white);
+        color: var(--primary-black);
+    }
+    
+    .footer {
+        background: var(--pure-white);
+        color: var(--primary-black);
+    }
+    
+    .footer-section a {
+        color: var(--primary-black);
+        opacity: 0.8;
+    }
+    
+    .social-link {
+        background: var(--light-gray);
+        color: var(--primary-black);
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .header,
+    .footer,
+    .newsletter,
+    .modal {
+        display: none !important;
+    }
+    
+    .hero {
+        background: none !important;
+        color: var(--primary-black) !important;
+        padding: var(--spacing-md) 0 !important;
+    }
+    
+    .article-card {
+        break-inside: avoid;
+        box-shadow: none !important;
+        border: 1px solid var(--light-gray) !important;
+    }
+    
+    body {
+        font-size: 12pt;
+        line-height: 1.4;
+    }
+    
+    h1, h2, h3 {
+        page-break-after: avoid;
+    }
+}

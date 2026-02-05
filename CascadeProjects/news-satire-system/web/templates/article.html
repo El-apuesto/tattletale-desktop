@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.headline }} - The Satire Chronicle{% endblock %}
+{% block description %}{{ article.opening_paragraph[:150] }}{% endblock %}
+{% block og_title %}{{ article.headline }}{% endblock %}
+{% block og_description %}{{ article.opening_paragraph[:150] }}{% endblock %}
+
+{% block content %}
+<!-- Article Header -->
+<section class="article-header">
+    <div class="container">
+        <div class="article-breadcrumb">
+            <a href="{{ url_for('home') }}">Home</a>
+            <span class="separator">/</span>
+            <a href="{{ url_for('category', category=article.category) }}">{{ article.category|title }}</a>
+        </div>
+        
+        <div class="article-meta-header">
+            <span class="category-tag large">{{ article.category|title }}</span>
+            <span class="article-date">{{ article.timestamp[:10] }}</span>
+        </div>
+        
+        <h1 class="article-title-main">{{ article.headline }}</h1>
+        
+        <div class="article-author-info">
+            <span class="author-name">By {{ article.byline }}</span>
+            <span class="article-reading-time">5 min read</span>
+        </div>
+    </div>
+</section>
+
+<!-- Article Content -->
+<section class="article-content-section">
+    <div class="container">
+        <div class="article-layout">
+            <!-- Main Content -->
+            <div class="article-main">
+                <!-- Featured Image/Comic -->
+                <div class="article-featured-media">
+                    {% if article.get('xkcd_comic') %}
+                        <div class="comic-container">
+                            <img src="{{ article.xkcd_comic.img }}" 
+                                 alt="{{ article.xkcd_comic.alt }}" 
+                                 class="article-featured-image"
+                                 title="{{ article.xkcd_comic.alt }}">
+                            <div class="comic-attribution">
+                                <p><a href="https://xkcd.com/{{ article.xkcd_comic.num }}/" target="_blank" rel="noopener noreferrer">
+                                    "{{ article.xkcd_comic.title }}" - XKCD #{{ article.xkcd_comic.num }}
+                                </a></p>
+                            </div>
+                        </div>
+                    {% elif article.get('custom_comic') %}
+                        <div class="comic-container">
+                            <img src="{{ article.custom_comic.url }}" 
+                                 alt="{{ article.custom_comic.alt_text }}" 
+                                 class="article-featured-image"
+                                 title="{{ article.custom_comic.title }}">
+                            <div class="comic-attribution">
+                                <p>Custom comic by The Satire Chronicle</p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="article-placeholder-large">
+                            <span class="placeholder-text">SC</span>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Article Text -->
+                <div class="article-text">
+                    <div class="opening-paragraph">
+                        {{ article.opening_paragraph }}
+                    </div>
+                    
+                    {% for paragraph in article.body_paragraphs %}
+                    <div class="body-paragraph">
+                        {{ paragraph }}
+                    </div>
+                    {% endfor %}
+                    
+                    <!-- Expert Quotes -->
+                    {% if article.expert_quotes %}
+                    <div class="expert-quotes-section">
+                        {% for quote in article.expert_quotes %}
+                        <blockquote class="expert-quote">
+                            <p class="quote-text">"{{ quote.quote }}"</p>
+                            <footer class="quote-attribution">
+                                <cite class="quote-author">{{ quote.expert }}</cite>
+                                {% if quote.affiliation %}
+                                <span class="quote-affiliation">{{ quote.affiliation }}</span>
+                                {% endif %}
+                            </footer>
+                        </blockquote>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Share Section -->
+                <div class="article-share">
+                    <h3>Share this article</h3>
+                    <div class="share-buttons">
+                        <button class="share-btn" onclick="shareArticle('{{ article.headline }}', '{{ request.url }}', '{{ article.opening_paragraph[:100] }}')">
+                            Share
+                        </button>
+                        <button class="copy-link-btn" onclick="navigator.clipboard.writeText('{{ request.url }}'); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy Link', 2000)">
+                            Copy Link
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <aside class="article-sidebar">
+                <!-- Newsletter -->
+                <div class="sidebar-widget">
+                    <h3>Stay Informed</h3>
+                    <p>Get the latest deadpan satire delivered to your inbox.</p>
+                    <form class="sidebar-newsletter-form">
+                        <input type="email" placeholder="Enter your email" required>
+                        <button type="submit">Subscribe</button>
+                    </form>
+                </div>
+                
+                <!-- Categories -->
+                <div class="sidebar-widget">
+                    <h3>Categories</h3>
+                    <ul class="category-list">
+                        <li><a href="{{ url_for('category', category='politics') }}">Politics</a></li>
+                        <li><a href="{{ url_for('category', category='business') }}">Business</a></li>
+                        <li><a href="{{ url_for('category', category='technology') }}">Technology</a></li>
+                        <li><a href="{{ url_for('category', category='science') }}">Science</a></li>
+                    </ul>
+                </div>
+                
+                <!-- About -->
+                <div class="sidebar-widget">
+                    <h3>About The Satire Chronicle</h3>
+                    <p>The Satire Chronicle delivers deadpan satire that reveals uncomfortable truths about power, hypocrisy, and systemic dysfunction.</p>
+                    <a href="{{ url_for('about') }}" class="read-more-link">Learn More →</a>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<!-- Related Articles -->
+{% if related_articles %}
+<section class="related-articles">
+    <div class="container">
+        <header class="section-header">
+            <h2 class="section-title">Related Articles</h2>
+            <div class="section-divider"></div>
+        </header>
+        
+        <div class="related-articles-grid">
+            {% for related in related_articles %}
+            <article class="related-article-card">
+                <div class="related-article-image">
+                    {% if related.get('xkcd_comic') %}
+                        <img src="{{ related.xkcd_comic.img }}" alt="{{ related.xkcd_comic.alt }}">
+                    {% elif related.get('custom_comic') %}
+                        <img src="{{ related.custom_comic.url }}" alt="{{ related.custom_comic.alt_text }}">
+                    {% else %}
+                        <div class="related-article-placeholder">
+                            <span class="placeholder-text">SC</span>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="related-article-content">
+                    <div class="article-meta">
+                        <span class="category-tag">{{ related.category|title }}</span>
+                        <span class="article-date">{{ related.timestamp[:10] }}</span>
+                    </div>
+                    
+                    <h3 class="related-article-title">
+                        <a href="{{ url_for('article', article_id=related.id) }}">
+                            {{ related.headline }}
+                        </a>
+                    </h3>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<script>
+// Track article view
+trackArticleView('{{ article.id }}');
+</script>
+{% endblock %}
